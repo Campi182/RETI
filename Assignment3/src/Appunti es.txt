@@ -1,0 +1,1 @@
+Avvio i thread in ordine professori -> tesisti -> studenti di modo che i professori siano i primi ad enetrare in coda. Se avessi avviato prima gli studenti potrebbe accadere che quando il trhread laboratorio vuole far lavorare qualcuno, non ho ancora professori in coda, e quindi questi devono aspettare.
