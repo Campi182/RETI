@@ -1,4 +1,3 @@
-import java.awt.desktop.UserSessionEvent;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -14,14 +13,13 @@ public class Laboratorio implements Runnable{
 	Object synchComputers = new Object();
 	
 	public Laboratorio(int posti) {
-		this.PcTesisti = rand.nextInt(posti);
+		this.PcTesisti = rand.nextInt(posti-1);
 		this.posti = posti;
 		computers = new int[this.posti];
 		
 		QueueProfessori  = new LinkedBlockingQueue<Runnable>();
 		QueueStudenti = new LinkedBlockingQueue<Runnable>();
 		QueueTesisti = new LinkedBlockingQueue<Runnable>();
-		
 		
 		
 		for(int i = 0; i < posti; i++)
@@ -35,17 +33,17 @@ public class Laboratorio implements Runnable{
 				while(QueueProfessori.isEmpty() && QueueStudenti.isEmpty() && QueueTesisti.isEmpty()) {
 					try {
 						this.wait();
-					} catch (Exception e) {
+					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
 				
-				if(QueueProfessori.isEmpty()) {
+				if(!QueueProfessori.isEmpty()) {
 					synchronized(synchComputers) {
 						while(!checkLabFree()) {
 							try {
 								this.wait();
-							} catch (Exception e) {
+							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
 						}
@@ -59,7 +57,11 @@ public class Laboratorio implements Runnable{
 						//synchronized(synchComputers) {
 				//manca il try
 							while(computers[PcTesisti] == 1)
-								this.wait();
+								try{
+									this.wait();
+								} catch(InterruptedException e) {
+									e.printStackTrace();
+								}
 							
 							User u = (User) QueueTesisti.remove();
 							computers[PcTesisti] = 1;
@@ -70,10 +72,14 @@ public class Laboratorio implements Runnable{
 				else if(!QueueStudenti.isEmpty()) {
 					int i = -1;
 					while((i= findPc()) == -1)
-						this.wait();
+						try{
+							this.wait();
+						} catch(InterruptedException e) {
+							e.printStackTrace();
+						}
 					
-					User u = QueueStudenti.remove();
-					u.setpc(i);
+					User u = (User) QueueStudenti.remove();
+					u.setPc(i);
 					computers[i] = 1;
 					u.work();
 				}
@@ -118,5 +124,14 @@ public class Laboratorio implements Runnable{
 		}
 		return true;
 	}
-	// profsetlab
+	
+	public synchronized int findPc() {
+		int i = 0;
+		while(i < this.posti) {
+			if(computers[i] == 0)
+				return i;
+			i++;
+		}
+		return -1;
+	}
 }

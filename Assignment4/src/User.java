@@ -24,6 +24,14 @@ public class User implements Runnable{
 		}
 	}
 
+	public void setPc(int i) {
+		this.UsingPc = 1;
+	}
+	
+	public int getPc() {
+		return this.UsingPc;
+	}
+	
 	public void work() {
 		this.access = 1;
 	}

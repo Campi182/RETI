@@ -1,5 +1,6 @@
 import java.util.Scanner;
 
+
 public class Main {
 
 	public static int numStudenti;
@@ -19,7 +20,6 @@ public class Main {
 			
 			Laboratorio lab = new Laboratorio(20);
 			Thread ThreadLab = new Thread(lab);
-			ThreadLab.start();
 			
 			
 			User[] studenti = new User[numStudenti];
@@ -50,6 +50,7 @@ public class Main {
 				ThreadStudenti[i].start();
 			}
 					
+			ThreadLab.start();
 			
 			//devo fare la join su tutti i thread
 			
