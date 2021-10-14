@@ -1,137 +1,73 @@
-import java.util.Random;
-import java.util.concurrent.LinkedBlockingQueue;
+public class Laboratorio{
 
-public class Laboratorio implements Runnable{
-
-	private static Random rand = new Random();
-	private int PcTesisti;
 	private final int[] computers;
 	private int posti;
-	private LinkedBlockingQueue<Runnable> QueueProfessori, QueueTesisti, QueueStudenti;
+	private int PcInUse = 0;
 	
-	Object synchQueue = new Object();
-	Object synchComputers = new Object();
-	
-	public Laboratorio(int posti) {
-		this.PcTesisti = rand.nextInt(posti-1);
+	public Laboratorio(int posti) {		
 		this.posti = posti;
 		computers = new int[this.posti];
-		
-		QueueProfessori  = new LinkedBlockingQueue<Runnable>();
-		QueueStudenti = new LinkedBlockingQueue<Runnable>();
-		QueueTesisti = new LinkedBlockingQueue<Runnable>();
-		
-		
 		for(int i = 0; i < posti; i++)
 			computers[i] = 0;
+		
 	}
 	
-	public void run() {
-		System.out.println("Pc assegnato ai tesisti: " + PcTesisti);
-		while(!Thread.currentThread().isInterrupted()) {
-			synchronized(synchQueue) {
-				while(QueueProfessori.isEmpty() && QueueStudenti.isEmpty() && QueueTesisti.isEmpty()) {
-					try {
-						this.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				
-				if(!QueueProfessori.isEmpty()) {
-					synchronized(synchComputers) {
-						while(!checkLabFree()) {
-							try {
-								this.wait();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						}
-						
-						User user = (User) QueueProfessori.remove();
-						//setto occupati tutti i pc
-						user.work();
-					}
-				}
-				else if(!QueueTesisti.isEmpty()){
-						//synchronized(synchComputers) {
-				//manca il try
-							while(computers[PcTesisti] == 1)
-								try{
-									this.wait();
-								} catch(InterruptedException e) {
-									e.printStackTrace();
-								}
-							
-							User u = (User) QueueTesisti.remove();
-							computers[PcTesisti] = 1;
-							u.work();
-						//}
-					
-				}
-				else if(!QueueStudenti.isEmpty()) {
-					int i = -1;
-					while((i= findPc()) == -1)
-						try{
-							this.wait();
-						} catch(InterruptedException e) {
-							e.printStackTrace();
-						}
-					
-					User u = (User) QueueStudenti.remove();
-					u.setPc(i);
-					computers[i] = 1;
-					u.work();
-				}
-			}
-			
-			
-		}
-	}
-	
-	public void insert(String user, Object tmp) {
-		synchronized(synchQueue) {
-			User u = (User) tmp;
-			
-			if(user.equals("Professore")) {
-				try {
-					QueueProfessori.put(u);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			if(user.equals("Studente")) {
-				try {
-					QueueStudenti.put(u);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			if(user.equals("Tesista")) {
-				try {
-					QueueTesisti.put(u);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	public synchronized boolean checkLabFree() {
+	public synchronized void setLabBusy() throws InterruptedException{
+		//se c'è qualche PC occupato devo aspettare
+		while(PcInUse > 0)
+			this.wait();
+		
 		for(int i = 0; i < posti; i++) {
-			if(computers[i] == -1)
-				return false;
+			PcInUse++;
+			computers[i] = 1;
 		}
-		return true;
+		//System.out.println("Settati tutti i pc da professore");
+		this.notify();
 	}
 	
-	public synchronized int findPc() {
-		int i = 0;
-		while(i < this.posti) {
-			if(computers[i] == 0)
-				return i;
-			i++;
+	public synchronized void setPc(int i) throws InterruptedException {
+		while(computers[i] == 1) {
+			this.wait();
 		}
-		return -1;
+		
+		computers[i] = 1;
+		PcInUse++;
+		//System.out.println("Occupato computer tesisti: " + i);
+		this.notify();
 	}
+	
+	public synchronized int setPc() throws InterruptedException{
+		int i;
+		
+		while(PcInUse == posti)
+			this.wait();
+		
+		for(i = 0; i < posti; i++) {
+			if(computers[i] == 0) {
+				PcInUse++;
+				computers[i] = 1;
+				break;
+			}
+		}
+		this.notify();
+		//System.out.println("Occupato computer " + i);
+		return i;
+	}
+	
+	public synchronized void freeLab() throws InterruptedException{
+		for(int i = 0; i < posti; i++) {
+			computers[i] = 0;
+			PcInUse--;
+		}
+		this.notify();
+		//System.out.println("Liberato tutto il laboratorio");
+	}
+	
+	public synchronized void freePc(int i) throws InterruptedException{
+		computers[i] = 0;
+		PcInUse--;
+		this.notify();
+		//System.out.println("Liberato computer " + i);
+	}
+	
 }
