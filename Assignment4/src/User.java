@@ -1,4 +1,3 @@
-import java.util.Random;
 
 public class User implements Runnable, Comparable<User>{
 	
@@ -10,20 +9,15 @@ public class User implements Runnable, Comparable<User>{
 	private String user;
 	private int UsingPc;
 	private int id;
-	private int numAccessi;
-	private Tutor tutor;
 	private int priority;
+	private int active;
 	
-	private static Random random = new Random();
-	final static int maxAccessiperUser = 1;
-	
-	public User(Laboratorio lab, Tutor tutor, String user, int id, int UsingPc) {
+	public User(Laboratorio lab, String user, int id, int UsingPc) {
 		this.lab = lab;
 		this.user = user;
-		this.tutor = tutor;
 		this.id = id;
 		this.UsingPc = UsingPc;
-		numAccessi = random.nextInt(maxAccessiperUser) + 3; //+1 perche deve fare almeno un accesso
+		active = 0;
 		if(user.equals("Studente"))
 			this.priority = 1;
 		else if(user.equals("Tesista"))
@@ -33,7 +27,7 @@ public class User implements Runnable, Comparable<User>{
 	}
 	
 	public void run() {
-		numAccessi--;
+			active = 1;
 			int sleep = (int)(Math.random()*1000);
 			System.out.println(user + " " + id + " lavora per " + sleep + "millisecondi");
 			try {
@@ -47,28 +41,23 @@ public class User implements Runnable, Comparable<User>{
 			try {
 			if(user.equals("Professore")) {
 				lab.freeLab();
+				active = 0;
 				//System.out.println("Professore "+id+" libera il lab");
 			}
 			else {
 				//System.out.println(user + id + " libera il computer");
 				lab.freePc(UsingPc);
+				active = 0;
 			}
 			} catch(InterruptedException ignored) {
 				;
 			}
-			
-			int wait = (int)(Math.random()*1000);
-			try {
-				Thread.sleep(wait);
-			} catch(InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			if(numAccessi != 0) {
-				tutor.InsertQueue(this);
-			}
 	}
 
+	public int isActive() {
+		return this.active;
+	}
+	
 	public int getPriority() {
 		return this.priority;
 	}
