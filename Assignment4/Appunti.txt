@@ -1,0 +1,7 @@
+L'oggetto monitor è il laboratorio.
+Il programma funziona così: Metto tutti gli utenti(anche i loro successivi accessi) in lista prima che venga startato il tutor.
+Un utente quindi può essere più di una volta nella lista. 
+Ho scelto questa soluzione perchè: o un utente chiedeva di reinserirsi in coda quando aveva finito ma in questo caso mi serviva l'utilizzo di una lock(e non 
+so se sarebbe stato corretto ai fini dell'esercizio) sulla PriorityQueue.
+Quindi il tutor gestisce tutti gli utenti fino a quando la PriorityQueue non è vuota.
+Inconsistenza: un utente può lavorare contemporaneamente su più PC (es. se ho solo 1 studente che fa 20 accessi al Lab potrebbe lavorare su 20 PC contemporaneamente)
