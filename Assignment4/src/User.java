@@ -1,80 +1,55 @@
+import java.util.Random;
 
-public class User implements Runnable, Comparable<User>{
+public class User implements Runnable{
 	
-	static final int STUDENTE = 1;
-	static final int TESISTA = 2;
-	static final int PROFESSORE = 3;
 	
 	private Laboratorio lab;
 	private String user;
 	private int UsingPc;
-	private int id;
-	private int priority;
-	private int active;
+	private int numAccessi;
+	private static Random random = new Random();
+	final static int maxAccessiPerUser = 3;
 	
-	public User(Laboratorio lab, String user, int id, int UsingPc) {
+	
+	public User(Laboratorio lab, String user, int UsingPc) {
 		this.lab = lab;
 		this.user = user;
-		this.id = id;
 		this.UsingPc = UsingPc;
-		active = 0;
-		if(user.equals("Studente"))
-			this.priority = 1;
-		else if(user.equals("Tesista"))
-			this.priority = 2;
-		else if(user.equals("Professore"))
-			this.priority = 3;
+		numAccessi = 1 + random.nextInt(maxAccessiPerUser);
 	}
 	
 	public void run() {
-			active = 1;
-			int sleep = (int)(Math.random()*1000);
-			System.out.println(user + " " + id + " lavora per " + sleep + "millisecondi");
+		for(int i = 0; i < numAccessi; i++) {
+			if(user.equals("Studente"))
+				UsingPc = lab.setPcStudent();
+			else if(user.equals("Tesista"))
+				lab.setPcTesista(UsingPc);
+			else if(user.equals("Professore"))
+				lab.setPcProfessore();
+			
+			//lavoro per 'sleep' msec
+			int sleep = (int)(Math.random()*500);
 			try {
 				Thread.sleep(sleep);
 			} catch(InterruptedException e) {
 				e.printStackTrace();
 			}
 			
-			
-			//finito di lavorare, se è prof deve liberare tutto altrimenti solo il pc utilizzato
-			try {
+			//finito di lavorare, libero il Pc(o il laboratorio nel caso Prof)
 			if(user.equals("Professore")) {
 				lab.freeLab();
-				active = 0;
-				//System.out.println("Professore "+id+" libera il lab");
 			}
 			else {
-				//System.out.println(user + id + " libera il computer");
 				lab.freePc(UsingPc);
-				active = 0;
 			}
-			} catch(InterruptedException ignored) {
-				;
+			
+			//aspetto 'wait' msec prima di rimettermi in coda
+			int wait = (int)(Math.random()*1000);
+			try {
+				Thread.sleep(wait);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-	}
-
-	public int isActive() {
-		return this.active;
-	}
-	
-	public int getPriority() {
-		return this.priority;
-	}
-	
-	public String getWho() {
-		return this.user;
-	}
-	
-	public int getUsingPc() {
-		return this.UsingPc;
-	}
-	
-	public void assignPc(int i) {
-		this.UsingPc = i;
-	}
-	
-	public int compareTo(User u) {
-		return u.getPriority() - this.priority;
+		}
 	}
 }

@@ -1,7 +1,7 @@
 import java.util.Scanner;
 import java.util.Random;
 
-public class Main {
+public class Main extends Thread{
 
 	public static int numStudenti;
 	public static int numTesisti;
@@ -11,7 +11,6 @@ public class Main {
 	public static int totUsers;
 	
 	private static Random random = new Random();
-	final static int maxAccessiPerUser = 3;
 	
 	public static void main(String[] args) throws InterruptedException {
 		
@@ -24,35 +23,48 @@ public class Main {
 			numProfessori = input.nextInt();
 			input.close();
 			totUsers = numStudenti + numProfessori + numTesisti;
+			PcTesisti = random.nextInt(posti);
 			
-			Laboratorio lab = new Laboratorio(posti);
-			Tutor tutor = new Tutor(lab);
-			//Thread ThreadTutor = new Thread(tutor);
-					
-			int numAccessi = 0;
+			Laboratorio lab = new Laboratorio(posti, PcTesisti);
+			User[] users = new User[totUsers];
+			Thread[] ThreadUsers = new Thread[totUsers];
+			
+			int curr = 0;
 			int pc = -1;
-			PcTesisti = random.nextInt(posti-1);
-			
-			for(int i = 0; i < numStudenti; i++) {
-				User u = new User(lab,"Studente", i, pc);
-				numAccessi = 1 + random.nextInt(maxAccessiPerUser);
-				for(int j = 0; j < numAccessi; j++)
-					tutor.InsertQueue(u);
-			}
+
+			System.out.println("PC TESISTI: "+PcTesisti);
 			
 			for(int i = 0; i < numProfessori; i++) {
-				User u = new User(lab,"Professore", i, pc);
-				tutor.InsertQueue(u);
-			}
+				users[curr]= new User(lab,"Professore", pc);
+				ThreadUsers[curr] = new Thread(users[curr]);
+				curr++;
+			}	
 			
 			for(int i = 0; i < numTesisti; i++) {
-				User u = new User(lab, "Tesista", i, PcTesisti);
-				tutor.InsertQueue(u);
+				users[curr] = new User(lab, "Tesista", PcTesisti);
+				ThreadUsers[curr] = new Thread(users[curr]);
+				curr++;
 			}
 			
+			for(int i = 0; i < numStudenti; i++) {
+				users[curr] = new User(lab,"Studente", pc);
+				ThreadUsers[curr] = new Thread(users[curr]);
+				curr++;
+			}
 			
-			tutor.start();
+			for(int i = 0; i<totUsers; i++)
+				ThreadUsers[i].start();
 			
+			
+			//!!!ASPETTO CHE TERMINANO I THREAD STUDENTI
+			for(int i = 0; i<totUsers-1; i++) {
+				try {
+					ThreadUsers[i].join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+			}
 	}
 
 }
