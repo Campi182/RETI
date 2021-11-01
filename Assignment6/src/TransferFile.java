@@ -1,10 +1,9 @@
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class TransferFile implements Runnable{
@@ -21,30 +20,27 @@ public class TransferFile implements Runnable{
 			OutputStream out = socket.getOutputStream();
 			){
 			
-			String path = in.nextLine().split(" ")[1].substring(1);	//substring perchè tolgo il / all'inizio del path
+			String path = in.nextLine().split(" ")[1].substring(1);	//substring perchè tolgo il '/' all'inizio del path
 			String extension;
 			StringBuilder headers;
-			byte[] BytesFile = null;
-			
-			/*if(path.equals("HTTP")) {	//!!!!!NON VA BENE!!!!!!//
-				//redirect to qualcosa
-				System.out.println("Richiesta nulla");
-			} else System.out.println("Richiesta: "+path);*/
+			byte[] BytesFile;
+			//System.out.println(path);
 			
 			
-			try {
 			File RequestedFile = new File(path);
-			BytesFile = Files.readAllBytes(Paths.get(path));
-			} catch(NoSuchFileException e) {
+			FileInputStream file;
+			try {
+				file = new FileInputStream(RequestedFile);
+			} catch(FileNotFoundException e) {
 				System.out.println("404 File not found\n");
 				out.write(fileNotFoundMessage());
+				return;
 			}
 			
 			int index = path.indexOf(".");
 			extension = path.substring(index);
-			System.out.println("Extension: "+extension);
 			
-			//!!!!INIZIALIZZAZIONE DEGLI HEADERS!!!!//
+			
 			headers = new StringBuilder("HTTP/1.1 200 OK\n" + "Server: TransferFileServer\n");
 			
 			switch(extension) {
@@ -52,31 +48,47 @@ public class TransferFile implements Runnable{
 				headers.append("Content-Type: text/plain\n");
 				break;
 			case ".jpg":
-				
+				headers.append("Content-Type: image/jpg\n");
 				break;
 			case ".gif":
-				
+				headers.append("Content-Type: image/gif\n");
 				break;
 			default:
 				break;
 			}
 				
 				
-			//aggiungo allo stream di uscita un 'a capo' per segnalare la fine degli headers
+			//aggiungo allo stream di uscita un 'a capo' per segnalare la fine degli headers ??
 			headers.append("\n");
 			
-			out.write(headers.toString().getBytes());
-			out.write(BytesFile);
-			out.flush();
+			
+			try {
+				BytesFile = new byte[(int)RequestedFile.length()];
+				if(file.read(BytesFile) == -1) {
+					System.out.println("Failed reading file");
+					file.close();
+					out.close();
+					return;
+				}
+				file.close();
+				
+				//outstream da inviare
+				out.write(headers.toString().getBytes());	//headers 
+				out.write(BytesFile);	//dati
+				out.flush();
+				
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
 			
 		} catch(Exception e) {
 			System.out.println("Error "+ socket);
 		}
 	}//run
 	
-	//invoke when 404 File Not Found
+	//invoke quando 404 File Not Found
 	private byte[] fileNotFoundMessage(){
-		String mes = "HTTP/1.1 404 Not Found\n"+"Server: TransferFileSever\n"+"Content-Type: text/html\n\n"+"<h1>ERROR 404&nbsp;</h1>\n"+"<p>Not Found</p>";
+		String mes = "HTTP/1.1 404 Not Found\n"+"Server: TransferFileSever\n";
 		return mes.getBytes();
 	}
 }
