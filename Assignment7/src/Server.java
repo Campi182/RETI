@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Random;
 
 public class Server {
 	
@@ -15,14 +15,20 @@ public class Server {
 	public static int port;
 	public static long seed;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		DatagramSocket serverSocket = null;
+		Random rand = new Random();
 		
 		try {
 			port = Integer.parseInt(args[0]);
 		}catch(NumberFormatException e) {
 			System.err.println("Usage: <port>");
 			System.exit(1);
+		}
+		
+		if(args.length == 2) {
+		seed = Integer.parseInt(args[1]);
+		rand.setSeed(seed);
 		}
 		
 		try {
@@ -34,24 +40,33 @@ public class Server {
 		}
 		
 		byte[] buf = new byte[bufSize];
-		System.out.printf("Server pronto sulla porta %s\n", port);
 		
 		try {
 			while(true) {
-				Arrays.fill(buf, (byte)0);
 				//Mi metto in attesa di richieste
 				DatagramPacket rp = new DatagramPacket(buf, buf.length);
 				serverSocket.receive(rp);
 				String msg = new String(rp.getData(), 0, rp.getLength(), StandardCharsets.US_ASCII);
-				System.out.println(rp.getAddress().toString()+":> "+rp.getPort()+" "+msg+" ACTION: accepted");
-				//System.out.printf("Richiesta ricevuta: %s\n", new String(rp.getData()));
-				//Preparo la risposta
-				InetAddress addr = rp.getAddress();
-				byte[] reply = new String(rp.getData()).getBytes();
-				//System.out.println(new String(reply));
-				DatagramPacket sp = new DatagramPacket(reply, reply.length, addr, port);
-				serverSocket.send(sp);
-				System.out.println("Risposta inviata");
+				
+				//decido se inviare o no il pack
+				boolean val = rand.nextInt(4) == 0; //4 perchè probabilità 25%
+				if(val) {
+					int delay = rand.nextInt(1000);
+					System.out.println(rp.getAddress().toString()+":"+rp.getPort()+"> "+msg+" ACTION: delayed "+ delay+" ms");
+					
+					//Preparo la risposta
+					InetAddress addr = rp.getAddress();
+					port = rp.getPort();
+					byte[] reply = new String(rp.getData()).getBytes();
+					//System.out.println(new String(reply));
+					DatagramPacket sp = new DatagramPacket(reply, reply.length, addr, port);
+					Thread.sleep(delay);
+					serverSocket.send(sp);
+					//System.out.println("Risposta inviata");
+				} else {
+					System.out.println(rp.getAddress().toString()+":"+rp.getPort()+"> "+msg+" ACTION: not sent ");
+				}
+
 			}
 		} catch(SocketTimeoutException e) {
 			System.out.println("Terminazione del server....");
@@ -59,7 +74,6 @@ public class Server {
 			System.err.println("Errore di I/O: "+ e.getMessage());
 		} finally {
 			serverSocket.close();
-			System.out.println("Server termianto");
 		}
 
 	}

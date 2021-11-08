@@ -3,7 +3,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.sql.Timestamp;
 
 
 public class Client {
@@ -12,8 +11,8 @@ public class Client {
 	public static String address;
 	public static InetAddress addr;
 	
-	public static final int timeout = 40000;
-	public static final int bufSize = 1024;
+	public static final int timeout = 2000;
+	public static final int bufSize = 500;
 
 	public static void main(String[] args) {
 		
@@ -31,12 +30,16 @@ public class Client {
 		}
 		
 		try {
-		addr = InetAddress.getByName(address);
+		addr = InetAddress.getByName(args[0]);
 		}catch (UnknownHostException e) {
 			System.out.println("ERR -arg 1");
 		}
 		
 		DatagramSocket clientSocket = null;
+		int packetsReceived = 0;
+		long min = Long.MAX_VALUE ,max = 0;
+		double avg = 0;
+		
 		byte[] content = null;
 		byte[] buf = new byte[bufSize];
 		
@@ -47,30 +50,36 @@ public class Client {
 			System.out.println("Nessuna risposta ricevuta");
 			return;
 		}
-		
-		try {
-			for(int i = 0; i < 10; i++) {
-				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-				content = new String("PING "+i+" "+timestamp).getBytes();
-				//System.out.println(new String(content));
+		for(int i = 0; i < 10; i++) {
+			try {
+				long start = System.currentTimeMillis();
+				content = new String("PING "+i+" "+start).getBytes();
 				DatagramPacket sp = new DatagramPacket(content, content.length, addr, port);
 				clientSocket.send(sp);
-				System.out.println("Richiesta inviata");
+				
+				System.out.print("PING "+i+" "+start+" RTT: ");
 				
 				//Attendo una risposta
 				DatagramPacket rp = new DatagramPacket(buf, buf.length);
 				clientSocket.receive(rp);
-				System.out.printf("Risposta ricevuta: %s\n", new String(rp.getData()));
+				long end = System.currentTimeMillis();
+				long rtt = end - start;
+				System.out.println(rtt+" ms");
+				packetsReceived++;
 				
-				Thread.sleep(2000);
+				avg+=rtt;
+				if(rtt < min)	min = rtt;
+				if(rtt > max)	max = rtt;
+			} catch(Exception e) {
+				System.out.println("*");
 			}
-		} catch(Exception e) {
-			System.err.println("Errore: "+ e.getMessage());
-		} finally {
-			clientSocket.close();
-			System.out.println("Client terminato");
 		}
 		
+		
+		clientSocket.close();
+		System.out.println("\n----- PING statistics -----");
+		System.out.printf("10 packets transmitted, %d packets received, %s%% packet loss\n", packetsReceived, (10-packetsReceived)*10);
+		System.out.printf("round-trip (ms) min/avg/max = %d / %.2f / %d", min, avg/packetsReceived, max);
 	}//MAIN
 
 }
