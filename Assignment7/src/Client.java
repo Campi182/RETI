@@ -32,7 +32,8 @@ public class Client {
 		try {
 		addr = InetAddress.getByName(args[0]);
 		}catch (UnknownHostException e) {
-			System.out.println("ERR -arg 1");
+			System.err.println("ERR -arg 1");
+			System.exit(1);
 		}
 		
 		DatagramSocket clientSocket = null;
@@ -45,18 +46,18 @@ public class Client {
 		
 		try {
 			clientSocket = new DatagramSocket();
-			clientSocket.setSoTimeout(timeout);
+			clientSocket.setSoTimeout(timeout);	//attendo 2 secondi per una risposta - se non arriva -> pacchetto perso
 		} catch(SocketException e) {
-			System.out.println("Nessuna risposta ricevuta");
+			System.out.println("Error: "+ e.getMessage());
 			return;
 		}
+		
 		for(int i = 0; i < 10; i++) {
 			try {
 				long start = System.currentTimeMillis();
 				content = new String("PING "+i+" "+start).getBytes();
 				DatagramPacket sp = new DatagramPacket(content, content.length, addr, port);
 				clientSocket.send(sp);
-				
 				System.out.print("PING "+i+" "+start+" RTT: ");
 				
 				//Attendo una risposta
@@ -79,7 +80,7 @@ public class Client {
 		clientSocket.close();
 		System.out.println("\n----- PING statistics -----");
 		System.out.printf("10 packets transmitted, %d packets received, %s%% packet loss\n", packetsReceived, (10-packetsReceived)*10);
-		System.out.printf("round-trip (ms) min/avg/max = %d / %.2f / %d", min, avg/packetsReceived, max);
-	}//MAIN
-
+		if(packetsReceived > 0)
+			System.out.printf("round-trip (ms) min/avg/max = %d / %.2f / %d", min, avg/packetsReceived, max);
+	}
 }

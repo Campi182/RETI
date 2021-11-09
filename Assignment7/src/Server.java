@@ -27,8 +27,13 @@ public class Server {
 		}
 		
 		if(args.length == 2) {
-		seed = Integer.parseInt(args[1]);
-		rand.setSeed(seed);
+			try {
+				seed = Integer.parseInt(args[1]);
+				rand.setSeed(seed);
+			}catch(NumberFormatException e) {
+				System.err.println("Usage: <seed>");
+				System.exit(1);
+			}
 		}
 		
 		try {
@@ -43,13 +48,13 @@ public class Server {
 		
 		try {
 			while(true) {
-				//Mi metto in attesa di richieste
 				DatagramPacket rp = new DatagramPacket(buf, buf.length);
 				serverSocket.receive(rp);
 				String msg = new String(rp.getData(), 0, rp.getLength(), StandardCharsets.US_ASCII);
 				
 				//decido se inviare o no il pack
-				boolean val = rand.nextInt(4) == 0; //4 perchè probabilità 25%
+				boolean val = rand.nextInt(4) != 0; 
+				
 				if(val) {
 					int delay = rand.nextInt(1000);
 					System.out.println(rp.getAddress().toString()+":"+rp.getPort()+"> "+msg+" ACTION: delayed "+ delay+" ms");
@@ -58,7 +63,6 @@ public class Server {
 					InetAddress addr = rp.getAddress();
 					port = rp.getPort();
 					byte[] reply = new String(rp.getData()).getBytes();
-					//System.out.println(new String(reply));
 					DatagramPacket sp = new DatagramPacket(reply, reply.length, addr, port);
 					Thread.sleep(delay);
 					serverSocket.send(sp);
@@ -75,7 +79,5 @@ public class Server {
 		} finally {
 			serverSocket.close();
 		}
-
 	}
-
 }
