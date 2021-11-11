@@ -1,18 +1,18 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 enum Causali {Bonifico, Accredito, Bolettino, F24, Pagobancomat}
 
 public class Movement {
 
-	private Date date;
+	private LocalDate date;
 	private Causali causale;
 	
-	public Movement(Date date, Causali causale) {
+	public Movement(LocalDate date, Causali causale) {
 		this.date = date;
 		this.causale = causale;
 	}
 	
-	public Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 	

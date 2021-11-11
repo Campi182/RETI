@@ -1,0 +1,47 @@
+{
+  "name": "Alice",
+  "surname": "Rossi",
+  "ID": 1,
+  "list": [
+    {
+      "date": {
+        "year": 2020,
+        "month": 1,
+        "day": 9
+      },
+      "causale": "Accredito"
+    },
+    {
+      "date": {
+        "year": 2019,
+        "month": 9,
+        "day": 17
+      },
+      "causale": "Accredito"
+    },
+    {
+      "date": {
+        "year": 2019,
+        "month": 10,
+        "day": 18
+      },
+      "causale": "Accredito"
+    },
+    {
+      "date": {
+        "year": 2019,
+        "month": 6,
+        "day": 8
+      },
+      "causale": "Accredito"
+    },
+    {
+      "date": {
+        "year": 2019,
+        "month": 4,
+        "day": 15
+      },
+      "causale": "Accredito"
+    }
+  ]
+}
