@@ -14,5 +14,7 @@ public class ContoCorrente {
 		this.list = list;
 	}
 	
-	
+	public String getName() {
+		return this.name;
+	}
 }

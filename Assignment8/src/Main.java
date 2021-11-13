@@ -33,10 +33,27 @@ public class Main {
 			ContoCorrente alice = new ContoCorrente("Alice", "Rossi", 1, AliceMovements);
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			String aliceJson = gson.toJson(alice);
+			
 			buf.clear();
+			String str = "[";
+			String str2 = "]";
+			String str3 = ",";
+			byte[] b = str.getBytes();
+			byte[] b2 = str2.getBytes();
+			byte[] b3 = str3.getBytes();
+			
+			
+			buf.put(b);
 			buf.put(aliceJson.getBytes());
+			//buf.put(b3);
+			
+			//buf.put(aliceJson.getBytes());
+			buf.put(b2);
 			buf.flip();
-			while(buf.hasRemaining())oc.write(buf);
+
+			while(buf.hasRemaining())
+				oc.write(buf);
+			
 			//ho scritto nel file gli oggetti
 			
 			//creo thread che legge i conti corrente e li passa al threadpool
