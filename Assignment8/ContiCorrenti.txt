@@ -4,44 +4,24 @@
   "ID": 1,
   "list": [
     {
-      "date": {
-        "year": 2020,
-        "month": 6,
-        "day": 16
-      },
-      "causale": "Accredito"
+      "causale": "Accredito",
+      "date": 6
     },
     {
-      "date": {
-        "year": 2019,
-        "month": 3,
-        "day": 16
-      },
-      "causale": "Accredito"
+      "causale": "Accredito",
+      "date": 13
     },
     {
-      "date": {
-        "year": 2020,
-        "month": 8,
-        "day": 8
-      },
-      "causale": "Accredito"
+      "causale": "Accredito",
+      "date": 19
     },
     {
-      "date": {
-        "year": 2020,
-        "month": 5,
-        "day": 15
-      },
-      "causale": "Accredito"
+      "causale": "Accredito",
+      "date": 2
     },
     {
-      "date": {
-        "year": 2020,
-        "month": 4,
-        "day": 18
-      },
-      "causale": "Accredito"
+      "causale": "Accredito",
+      "date": 24
     }
   ]
 }]

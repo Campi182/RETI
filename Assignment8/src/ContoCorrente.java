@@ -1,9 +1,14 @@
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+
 public class ContoCorrente {
 
+	
 	private String name;
+	
 	private String surname;
+	
 	private int ID;
 	private List<Movement> list;
 	

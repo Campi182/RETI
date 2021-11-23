@@ -35,20 +35,10 @@ public class Main {
 			String aliceJson = gson.toJson(alice);
 			
 			buf.clear();
-			String str = "[";
-			String str2 = "]";
-			String str3 = ",";
-			byte[] b = str.getBytes();
-			byte[] b2 = str2.getBytes();
-			byte[] b3 = str3.getBytes();
 			
-			
-			buf.put(b);
 			buf.put(aliceJson.getBytes());
-			//buf.put(b3);
 			
 			//buf.put(aliceJson.getBytes());
-			buf.put(b2);
 			buf.flip();
 
 			while(buf.hasRemaining())
@@ -80,8 +70,8 @@ public class Main {
 			int month = rand.nextInt(12)+1;
 			int year = rand.nextInt(2)+2019;
 			int day = rand.nextInt(28)+1;
-			LocalDate date = LocalDate.of(year, month, day);
-			list.add(new Movement(date, Causali.Accredito));
+			//LocalDate date = LocalDate.of(year, month, day);
+			list.add(new Movement(day, Causali.Accredito));
 		}
 		return list;
 	}
