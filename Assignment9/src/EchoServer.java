@@ -50,7 +50,7 @@ public class EchoServer {
 						SocketChannel client = server.accept();
 						client.configureBlocking(false);
 						System.out.println("Accepted connection from " + client);
-						SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
+						client.register(selector, SelectionKey.OP_READ);
 					}
 					else if(key.isReadable()) {	//Richieste di lettura
 						SocketChannel client = (SocketChannel) key.channel();
