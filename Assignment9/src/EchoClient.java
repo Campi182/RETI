@@ -15,7 +15,7 @@ public class EchoClient{
 		try {
 			socketChannel = SocketChannel.open();
 			socketChannel.connect(new InetSocketAddress("localhost", PORT));
-			
+			//bloccante, si blocca finchè non si connette
 			while(true) {
 				Scanner input = new Scanner(System.in);
 				String str = input.nextLine();

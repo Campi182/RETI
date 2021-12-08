@@ -20,12 +20,13 @@ public class EchoServer {
 		try {
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(PORT));
-			serverSocketChannel.configureBlocking(false);
+			serverSocketChannel.configureBlocking(false);	//non bloccante
 			
-			//Selector
+			//Selector: permette di selezionare un SelectableChannel pronto per operazioni
 			selector = Selector.open();
-			serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-		
+			SelectionKey clientkey = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+		//Ogni canale deve essere registrato
+			
 		ByteBuffer buffer = ByteBuffer.allocate(1024);
 		System.out.println("SERVER IS ON");
 		
